@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Assistant</title>
+</head>
+<body id="app" style="background: linear-gradient(to right, #ff4e50, #85190d); color: white; font-family: Tahoma, sans-serif; margin: 0; padding: 0; box-sizing: border-box;" data-theme="red">
+
+    <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <h1>Personal Assistant Dashboard</h1>
+        <button onclick="toggleTheme()" style="background: transparent; border: none; cursor: pointer; font-size: 1.5em;">🌐</button>
+    </div>
+
+    <p style="padding: 0 20px;">Hello, how can I help you today?</p>
+
+    <div style="display: flex; gap: 20px; padding: 0 20px;">
+        <div style="flex: 1; background: rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 20px;">
+            <h2>📅 Calendar</h2>
+            <p><strong>Meeting with Team:</strong> March 3, 2025 at 10:00 AM</p>
+            <p><strong>Doctor's Appointment:</strong> March 5, 2025 at 3:00 PM</p>
+            <p><strong>Project Deadline:</strong> March 12, 2025</p>
+        </div>
+        <div style="flex: 1; background: rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 20px;">
+            <h2>✅ To-Do List</h2>
+            <p>🛒 Buy groceries</p>
+            <p>📞 Call Mom</p>
+            <p>📚 Finish reading book</p>
+            <p>✍️ Write project proposal</p>
+        </div>
+        <div style="flex: 1; background: rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 20px;">
+            <h2>☀️ Weather</h2>
+            <p>🌤️ Partly Cloudy, 72°F (22°C)</p>
+            <p>🌧️ Tomorrow: Light Rain, 65°F (18°C)</p>
+            <p>🌞 Weekend: Sunny, 78°F (26°C)</p>
+        </div>
+    </div>
+
+    <div id="chatbot" style="position: fixed; bottom: 20px; right: 20px; width: 675px;">
+        <div id="chat-window" style="background: white; border-radius: 16px; color: black; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); max-height: 0; overflow: hidden; transition: max-height 0.5s ease, padding 0.5s ease; padding: 0; height: 70vh;">
+            <div id="chat-header" style="background: #ff4e50; color: white; padding: 10px; border-top-left-radius: 16px; border-top-right-radius: 16px;">💬 Personal Assistant</div>
+            <div id="chat-log" style="overflow-y: scroll; max-height: calc(70vh - 100px); padding: 10px;"></div>
+            <input id="chat-input" type="text" placeholder="Ask me anything..." style="width: calc(100% - 40px); padding: 20px; margin-top: 10px; border: none; border-radius: 8px; font-size: 1.1em;" onkeypress="handleKeyPress(event)" />
+            <button id="send-button" onclick="sendMessage()" style="margin-top: 10px; padding: 10px; border: none; border-radius: 8px; background: #ff4e50; color: white; cursor: pointer;">Send</button>
+        </div>
+
+        <button id="chat-toggle" onclick="toggleChat()" style="position: fixed; bottom: 20px; right: 20px; background: #ff4e50; color: white; border: none; padding: 10px; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; animation: pulse 1.5s infinite;">💬</button>
+    </div>
+
+    <script>
+        const protocol = (window.location.protocol === 'https:') ? 'wss' : 'ws';
+        const socket = new WebSocket(protocol + '://' + window.location.host + '/bot');
+
+        let currentAssistantMessage = null;
+
+        socket.onerror = function(evt) {
+            const chatLog = document.getElementById('chat-log');
+            const errorMessage = document.createElement('div');
+            errorMessage.innerHTML = '<div style="display: flex; align-items: center; margin-bottom: 20px; color: white; background: #ff4e50; padding: 10px; border-radius: 8px;"><span style="font-size: 1.8em; margin-right: 10px;">❌</span><strong>Error:</strong> Connection issue, reload to refresh.</div>';
+            chatLog.appendChild(errorMessage);
+        };
+
+        socket.onclose = function(evt) {
+            const chatLog = document.getElementById('chat-log');
+            const errorMessage = document.createElement('div');
+            errorMessage.innerHTML = '<div style="display: flex; align-items: center; margin-bottom: 20px; color: white; background: #ff4e50; padding: 10px; border-radius: 8px;"><span style="font-size: 1.8em; margin-right: 10px;">❌</span><strong>Error:</strong> Connection closed. </div>';
+            chatLog.appendChild(errorMessage);
+        };
+
+        socket.onmessage = function(event) {
+            const chatLog = document.getElementById('chat-log');
+
+            if (!currentAssistantMessage) {
+                currentAssistantMessage = document.createElement('div');
+                currentAssistantMessage.innerHTML = '<div style="display: flex; align-items: flex-start; margin-bottom: 20px;"><span style="font-size: 1.8em; margin-right: 10px; margin-top: 4px;">🟠</span><div style="flex: 1;"><strong>Assistant:</strong> <span id="assistant-text"></span></div></div>';
+                chatLog.appendChild(currentAssistantMessage);
+            }
+
+            const appendText = (text) => {
+                const assistantText = currentAssistantMessage.querySelector('#assistant-text');
+                assistantText.innerHTML += text.replace(/\n/g, '<br>');
+                setTimeout(() => { chatLog.scrollTop = chatLog.scrollHeight; }, 0);
+            };
+
+            if (event.data instanceof Blob) {
+                const reader = new FileReader();
+                reader.onload = () => appendText(reader.result);
+                reader.readAsText(event.data);
+            } else {
+                appendText(event.data);
+            }
+        };
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            if (input.value.trim() === '') return;
+
+            const chatLog = document.getElementById('chat-log');
+            const userMessage = document.createElement('div');
+            userMessage.innerHTML = '<div style="display: flex; align-items: flex-start; margin-bottom: 20px;"><span style="font-size: 1.8em; margin-right: 10px; margin-top: 4px;">👤</span><div style="flex: 1;"><strong>You:</strong> ' + input.value + '</div></div>';
+            chatLog.appendChild(userMessage);
+
+            socket.send(input.value);
+            input.value = '';
+
+            currentAssistantMessage = null;
+            setTimeout(() => { chatLog.scrollTop = chatLog.scrollHeight; }, 0);
+        }
+
+        function handleKeyPress(event) {
+             if (event.key === 'Enter') {
+                  sendMessage();
+             }
+        }
+
+        function toggleTheme() {
+            const app = document.getElementById('app');
+            const chatHeader = document.getElementById('chat-header');
+            const chatToggle = document.getElementById('chat-toggle');
+            const sendButton = document.getElementById('send-button');
+
+            if (app.dataset.theme === 'red') {
+                app.style.background = 'linear-gradient(to right, #4e9cff, #0d5185)';
+                chatHeader.style.background = '#4e9cff';
+                chatToggle.style.background = '#4e9cff';
+                sendButton.style.background = '#4e9cff';
+                app.dataset.theme = 'blue';
+            } else {
+                app.style.background = 'linear-gradient(to right, #ff4e50, #85190d)';
+                chatHeader.style.background = '#ff4e50';
+                chatToggle.style.background = '#ff4e50';
+                sendButton.style.background = '#ff4e50';
+                app.dataset.theme = 'red';
+            }
+        }
+
+        function toggleChat() {
+            const chatWindow = document.getElementById('chat-window');
+            const chatToggle = document.getElementById('chat-toggle');
+            if (chatWindow.style.maxHeight === '0px' || chatWindow.style.maxHeight === '') {
+                chatWindow.style.maxHeight = '70vh';
+                chatWindow.style.padding = '10px';
+                chatToggle.textContent = '❌';
+                chatToggle.style.animation = '';
+            } else {
+                chatWindow.style.maxHeight = '0px';
+                chatWindow.style.padding = '0';
+                chatToggle.textContent = '💬';
+                chatToggle.style.animation = 'pulse 1.5s infinite';
+            }
+        }
+    </script>
+        <style>
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                }
+
+                50% {
+                    transform: scale(1.3);
+                }
+
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            .pulse {
+                width: 100px;
+                height: 100px;
+                background-color: #3498db;
+                border-radius: 50%;
+                animation: pulse 2s infinite;
+            }
+        </style>
+
+</body>
+</html>

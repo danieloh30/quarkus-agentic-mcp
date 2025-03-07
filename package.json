@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@modelcontextprotocol/server-brave-search": "^0.6.2",
+    "@modelcontextprotocol/server-filesystem": "^0.6.2",
+    "@modelcontextprotocol/server-google-maps": "^0.6.2",
+    "@modelcontextprotocol/server-memory": "^0.6.2",
+    "@modelcontextprotocol/server-slack": "^0.6.2"
+  }
+}

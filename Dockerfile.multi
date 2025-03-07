@@ -1,0 +1,10 @@
+FROM maven:3.9.8-eclipse-temurin-21 AS builder
+ENV PROFILE=prod
+WORKDIR /opt/app
+COPY . .
+RUN mvn package -Dquarkus.profile=$PROFILE
+
+FROM registry.access.redhat.com/ubi9/openjdk-21:1.20
+COPY --from=builder /opt/app/target/*-runner.jar /app.jar
+CMD java -jar /app.jar
+EXPOSE 8080
