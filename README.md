@@ -54,7 +54,7 @@ My name is Daniel Oh. I am a member of a team of 2 myself and James Falkner. I l
 Please find one good restaurant in Boston, MA with the highest rating that meets
 the team's dietary needs and preferences. Then, invite the team to a lunch at 12pm next Friday.
 In your message, include the name and description of the restaurant, the time and
-date of the lunch, and driving directions from Georgia World Congress Center.
+date of the lunch, and driving directions from Back Bay, Boston.
 ```
 
 And some simpler follow-up prompts like:
