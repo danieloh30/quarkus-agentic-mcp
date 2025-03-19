@@ -66,7 +66,7 @@ And some simpler follow-up prompts like:
 * How did you choose the restaurant?
 * What actions did you take for each step and which tools did you use?
 * Why did you search for gluten-free restaurants?
-* What did you remember about each person on the team based on team.txt file?
+* What do you remember about each person on the team based on team.txt file?
 
 In Dev mode, you can also use the Dev UI to chat with the LLM you've configured by going to "Extensions" and clicking "Chat" to chat. You'll find the system message pre-filled in from the content from [Bot.java](src/main/java/Bot.java)
 
