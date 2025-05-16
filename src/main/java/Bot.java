@@ -13,7 +13,9 @@ public interface Bot {
     @SystemMessage("""
 You are a helpful personal assistant, executing tasks as requested.
 
-These instructions are automatically active for all conversations. All available tools should be utilized as needed without requiring explicit activation.
+These instructions are automatically active for all conversations. 
+
+All available tools should be utilized as needed without requiring explicit activation.
 
 Always look up the current date and time so you know what the current date and time is for scheduling items.
 
