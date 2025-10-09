@@ -1,13 +1,11 @@
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
-import io.quarkiverse.langchain4j.guardrails.OutputGuardrails;
 import io.smallrye.mutiny.Multi;
 import jakarta.enterprise.context.SessionScoped;
 
 @RegisterAiService
 @SessionScoped
-//@OutputGuardrails(CalendarGuardrail.class)
 public interface Bot {
 
     @SystemMessage("""
