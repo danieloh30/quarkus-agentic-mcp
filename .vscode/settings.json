@@ -6,6 +6,7 @@
             "PARASOL_MODEL_NAME": "parasol-chat"
         },
         "rootPath": "prompt-testing"
-    }
+    },
+    "java.compile.nullAnalysis.mode": "automatic"
 }
 
